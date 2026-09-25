@@ -31,7 +31,7 @@ const Navbar = (props) => {
             <img src={search} alt="" className='absolute top-4 left-2 w-5' />
             <input placeholder='Search city,area,or locality...' 
                    className='w-[50px] sm:w-[150px] md:w-[250px] lg:w-[270px] p-3 pl-8 pr-8 border-black border-solid border-2 rounded-md placeholder:text-ellipsis focus:outline-none focus:border-teal-300'
-                   type="text" name="" id="" />
+                   type="text" name="" id="" autoComplete="off"/>
             <img src={arrow} alt="" className='absolute top-4 right-3 w-5 cursor-pointer' />
         </div>
 
@@ -76,15 +76,6 @@ const Navbar = (props) => {
               </button>
             </div>
         )}
-
-        {/* {!user ? (
-          <p className='font-bold underline ml-5 cursor-pointer' style={{color: '#002f34'}}>Login</p>
-        ) : (
-            <div className='relative'>
-              <p style={{color: '#002f34'}} className='font-bold ml-5 cursor-pointer'>{user.displayName?.split(' ')[0] }</p>
-
-            </div>
-        )} */}
 
         {/* sell button */}
         <img src={addBtn} 

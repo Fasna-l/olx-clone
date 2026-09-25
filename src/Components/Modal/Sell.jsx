@@ -23,9 +23,31 @@ const Sell = (props) => {
 
     const auth = UserAuth();
 
-    const handleImageUpload = (event)=>{
-        if(event.target.files) setImage(event.target.files[0])
-    }
+    const handleImageUpload = (event) => {
+        const file = event.target.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        const allowedTypes = [
+            'image/svg+xml',
+            'image/png',
+            'image/jpeg'
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            alert('Only SVG, PNG, and JPG images are allowed');
+            event.target.value = '';
+            setImage(null);
+            return;
+        }
+
+        setImage(file);
+    };
+    // const handleImageUpload = (event)=>{
+    //     if(event.target.files) setImage(event.target.files[0])
+    // }
     
     const handleSubmit = async (event)=>{
         event.preventDefault();
@@ -42,7 +64,7 @@ const Sell = (props) => {
                 const reader = new FileReader();
                 reader.onloadend = ()=>{
                     const imageUrl = reader.result
-                    localStorage.setItem(`image_${file.name}`, imageUrl)
+                    //localStorage.setItem(`image_${file.name}`, imageUrl)
                     resolve(imageUrl)
                 }
                 reader.onerror = reject
@@ -67,11 +89,40 @@ const Sell = (props) => {
         const trimmedCategory = category.trim();
         const trimmedPrice = price.trim();
         const trimmedDescription = description.trim();
-  
 
-        if(!trimmedTitle || !trimmedCategory ||!trimmedPrice || !trimmedDescription  ){
-            alert('All fields are required');
-            setSubmitting(false)
+        if (!trimmedTitle) {
+            alert('Please enter a title');
+            setSubmitting(false);
+            return;
+        }
+
+        if (!trimmedCategory) {
+            alert('Please enter a category');
+            setSubmitting(false);
+            return;
+        }
+
+        if (!trimmedPrice) {
+            alert('Please enter a price');
+            setSubmitting(false);
+            return;
+        }
+
+        if (isNaN(trimmedPrice) || Number(trimmedPrice) <= 0) {
+            alert('Please enter a valid price');
+            setSubmitting(false);
+            return;
+        }
+
+        if (!trimmedDescription) {
+            alert('Please enter a description');
+            setSubmitting(false);
+            return;
+        }
+
+        if (!image) {
+            alert('Please upload an image');
+            setSubmitting(false);
             return;
         }
 
@@ -143,10 +194,9 @@ const Sell = (props) => {
                        ) : (
                         <div  className="relative h-40 sm:h-60 w-full border-2 border-black border-solid rounded-md">
                             <input
-                            onChange={handleImageUpload}
-                            type="file" 
-                            className="absolute inset-10 h-full w-full opacity-0 cursor-pointer z-30"
-                            required
+                                onChange={handleImageUpload}
+                                type="file"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-30"
                             />
 
                             <div  className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] flex flex-col items-center">

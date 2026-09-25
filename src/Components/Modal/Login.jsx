@@ -1,16 +1,23 @@
 import { Carousel, Modal, ModalBody } from 'flowbite-react'
-import React from 'react'
+import React, { useState } from 'react'
 import mobile from '../../assets/mobile.svg'
 import guitar from '../../assets/guita.png'
 import love from '../../assets/love.png'
 import avatar from '../../assets/avatar.png'
 import close from '../../assets/close.svg'
 import google from '../../assets/google.png'
-import { signInWithPopup } from 'firebase/auth'
+import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword,  updateProfile } from 'firebase/auth'
 import { auth, provider } from '../Firebase/Firebase'
 
 const Login = ({toggleModal,status}) => {
   
+  const [emailLogin, setEmailLogin] = useState(false);
+  const [signUp, setSignUp] = useState(false);
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
   const handleClick= async()=>{
     try {
         const result = await signInWithPopup(auth,provider);
@@ -21,7 +28,73 @@ const Login = ({toggleModal,status}) => {
         console.log(error);
     }
   }
+
+  const handleEmailLogin = async () => {
+    if (!email || !password) {
+      alert("Please enter email and password");
+      return;
+    }
+
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+
+      console.log("User", result.user);
+
+      toggleModal();
+
+      setEmail('');
+      setPassword('');
+      setEmailLogin(false);
+
+    } catch (error) {
+      console.log(error);
+      alert("Invalid email or password");
+    }
+  };
   
+  const handleSignUp = async () => {
+    if (!name || !email || !password) {
+      alert("Please enter name, email and password");
+      return;
+    }
+
+    try {
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      await updateProfile(result.user, {
+        displayName: name
+      });
+
+      console.log("New user", result.user);
+
+      alert("Account created successfully");
+
+      setName('');
+      setEmail('');
+      setPassword('');
+      setEmailLogin(false);
+      setSignUp(false);
+      toggleModal();
+
+    } catch (error) {
+      console.log(error);
+
+      if (error.code === "auth/email-already-in-use") {
+        alert("This email is already registered");
+      } else if (error.code === "auth/weak-password") {
+        alert("Password should be at least 6 characters");
+      } else if (error.code === "auth/invalid-email") {
+        alert("Please enter a valid email");
+      } else {
+        alert("Failed to create account");
+      }
+    }
+  };
+
   return (
     <div>
        {/* if status true then modal visible else not */}
@@ -84,10 +157,120 @@ const Login = ({toggleModal,status}) => {
             <p className="text-sm text-gray-500">Continue with google</p>
           </div>
 
-          <div className="pt-5 flex flex-col items-center justify-center">
+          {!emailLogin ? (
+            <div className="pt-5 flex flex-col items-center justify-center">
+              <p className="font-semibold text-sm">OR</p>
+
+              <p
+                onClick={() => setEmailLogin(true)}
+                className="font-bold text-sm pt-3 underline underline-offset-4 cursor-pointer"
+              >
+                Login with email
+              </p>
+            </div>
+            ) : !signUp ? (
+            // Login form
+            <div className="pt-5">
+
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
+              />
+
+              <input
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
+              />
+
+              <button
+                onClick={handleEmailLogin}
+                className="w-full bg-teal-600 text-white font-bold rounded-md p-3"
+              >
+                Login
+              </button>
+
+              <p className="text-center text-sm mt-3">
+                Don't have an account?{' '}
+                <span
+                  onClick={() => setSignUp(true)}
+                  className="font-bold underline cursor-pointer"
+                >
+                  Sign Up
+                </span>
+              </p>
+
+              <p
+                onClick={() => setEmailLogin(false)}
+                className="text-center text-sm font-semibold underline mt-3 cursor-pointer"
+              >
+                Back
+              </p>
+
+            </div>
+          ) : (
+            // Sign Up form
+            <div className="pt-5">
+
+              <h2 className="text-center font-bold text-lg mb-4">
+                Create an account
+              </h2>
+
+              <input
+                type="text"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
+              />
+
+              <input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
+              />
+
+              <input
+                type="password"
+                placeholder="Create a password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
+              />
+
+              <button
+                onClick={handleSignUp}
+                className="w-full bg-teal-600 text-white font-bold rounded-md p-3"
+              >
+                Create Account
+              </button>
+
+              <p
+                onClick={() => setSignUp(false)}
+                className="text-center text-sm font-semibold underline mt-3 cursor-pointer"
+              >
+                Back to Login
+              </p>
+
+            </div>
+          )}
+
+          {/* <div className="pt-5 flex flex-col items-center justify-center">
             <p className="font-semibold text-sm">OR</p>
-            <p className="font-bold text-sm pt-3 underline underline-offset-4">Login with email</p>
-          </div>
+            <p
+              onClick={() => setEmailLogin(true)}
+              className="font-bold text-sm pt-3 underline underline-offset-4 cursor-pointer"
+            >
+              Login with email
+            </p>
+          </div> */}
 
           <div  className="pt-10 sm:pt-20 flex flex-col items-center justify-center">
             <p className="text-xs">All your personal details are safe with us.</p>
@@ -95,10 +278,6 @@ const Login = ({toggleModal,status}) => {
           </div>
         </div>
       </ModalBody>
-        
-        {/* <div>
-          <p>This is your modal</p>
-        </div> */}
       </Modal>
     </div>
   )
