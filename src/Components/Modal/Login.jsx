@@ -18,6 +18,13 @@ const Login = ({toggleModal,status}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  //login
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  //signup
+  const [nameError, setNameError] = useState("");
+
   const handleClick= async()=>{
     try {
         const result = await signInWithPopup(auth,provider);
@@ -30,8 +37,23 @@ const Login = ({toggleModal,status}) => {
   }
 
   const handleEmailLogin = async () => {
-    if (!email || !password) {
-      alert("Please enter email and password");
+    
+    setEmailError("");
+    setPasswordError("");
+
+    let isValid = true;
+
+    if(!email.trim()){
+      setEmailError("Please enter your email");
+      isValid = false;
+    }
+
+    if(!password.trim()){
+      setPasswordError("Please enter your password");
+      isValid = false;
+    }
+
+    if(!isValid){
       return;
     }
 
@@ -48,15 +70,41 @@ const Login = ({toggleModal,status}) => {
 
     } catch (error) {
       console.log(error);
-      alert("Invalid email or password");
+      setPasswordError("Invalid email or password");
+    
     }
   };
   
   const handleSignUp = async () => {
-    if (!name || !email || !password) {
-      alert("Please enter name, email and password");
-      return;
+  
+    setNameError("");
+    setEmailError("");
+    setPasswordError("");
+
+    let isValid = true;
+
+    if (!name.trim()) {
+      setNameError("Please enter your name");
+      isValid = false;
     }
+
+    if (!email.trim()) {
+      setEmailError("Please enter your email");
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError("Please enter a valid email");
+      isValid = false;
+    }
+
+    if (!password.trim()) {
+      setPasswordError("Please enter your password");
+      isValid = false;
+    } else if (password.length < 6) {
+      setPasswordError("Password should be at least 6 characters");
+      isValid = false;
+    }
+
+    if (!isValid) return;
 
     try {
       const result = await createUserWithEmailAndPassword(
@@ -71,7 +119,6 @@ const Login = ({toggleModal,status}) => {
 
       console.log("New user", result.user);
 
-      alert("Account created successfully");
 
       setName('');
       setEmail('');
@@ -84,13 +131,13 @@ const Login = ({toggleModal,status}) => {
       console.log(error);
 
       if (error.code === "auth/email-already-in-use") {
-        alert("This email is already registered");
+        setEmailError("This email is already registered");
       } else if (error.code === "auth/weak-password") {
-        alert("Password should be at least 6 characters");
+        setPasswordError("Password should be at least 6 characters");
       } else if (error.code === "auth/invalid-email") {
-        alert("Please enter a valid email");
+        setEmailError("Please enter a valid email");
       } else {
-        alert("Failed to create account");
+        setEmailError("Failed to create account");
       }
     }
   };
@@ -176,17 +223,43 @@ const Login = ({toggleModal,status}) => {
                 type="email"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  setEmailError("");
+                }}
+                className={`w-full border-2 rounded-md p-3 focus:outline-none ${
+                  emailError
+                    ? "border-red-500"
+                    : "border-gray-300 focus:border-teal-500"
+                }`}
+                //className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
               />
+              {emailError && (
+                <p className="text-red-500 text-sm mt-1 mb-2">
+                  {emailError}
+                </p>
+              )}
 
               <input
                 type="password"
                 placeholder="Enter your password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  setPasswordError("");
+                }}
+                className={`w-full border-2 rounded-md p-3 focus:outline-none ${
+                  passwordError
+                    ? "border-red-500"
+                    : "border-gray-300 focus:border-teal-500"
+                }`}
+                //className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
               />
+              {passwordError && (
+                <p className="text-red-500 text-sm mt-1 mb-2">
+                  {passwordError}
+                </p>
+              )}
 
               <button
                 onClick={handleEmailLogin}
@@ -225,26 +298,66 @@ const Login = ({toggleModal,status}) => {
                 type="text"
                 placeholder="Enter your name"
                 value={name}
-                onChange={(event) => setName(event.target.value)}
-                className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
+                onChange={(event) => {
+                  setName(event.target.value);
+                  setNameError("");
+                }}
+                className={`w-full border-2 rounded-md p-3 mb-1 focus:outline-none ${
+                  nameError
+                    ? "border-red-500"
+                    : "border-gray-300 focus:border-teal-500"
+                }`}
+                //className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
               />
+
+              {nameError && (
+                <p className="text-red-500 text-sm mb-2">
+                  {nameError}
+                </p>
+              )}
 
               <input
                 type="email"
                 placeholder="Enter your email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
+                onChange={(event) => {
+                  setEmail(event.target.value);
+                  setEmailError("");
+                }}
+                className={`w-full border-2 rounded-md p-3 mb-1 focus:outline-none ${
+                  emailError
+                    ? "border-red-500"
+                    : "border-gray-300 focus:border-teal-500"
+                }`}
+                //className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
               />
+
+               {emailError && (
+                  <p className="text-red-500 text-sm mb-2">
+                    {emailError}
+                  </p>
+                )}
 
               <input
                 type="password"
                 placeholder="Create a password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  setPasswordError("");
+                }}
+                className={`w-full border-2 rounded-md p-3 mb-1 focus:outline-none ${
+                  passwordError
+                    ? "border-red-500"
+                    : "border-gray-300 focus:border-teal-500"
+                }`}
+                //className="w-full border-2 border-gray-300 rounded-md p-3 mb-3 focus:outline-none focus:border-teal-500"
               />
-
+              {passwordError && (
+                <p className="text-red-500 text-sm mb-2">
+                  {passwordError}
+                </p>
+              )}
               <button
                 onClick={handleSignUp}
                 className="w-full bg-teal-600 text-white font-bold rounded-md p-3"
@@ -253,7 +366,12 @@ const Login = ({toggleModal,status}) => {
               </button>
 
               <p
-                onClick={() => setSignUp(false)}
+                onClick={() => {
+                  setSignUp(false);
+                  setNameError("");
+                  setEmailError("");
+                  setPasswordError("");
+                }}
                 className="text-center text-sm font-semibold underline mt-3 cursor-pointer"
               >
                 Back to Login
@@ -262,15 +380,6 @@ const Login = ({toggleModal,status}) => {
             </div>
           )}
 
-          {/* <div className="pt-5 flex flex-col items-center justify-center">
-            <p className="font-semibold text-sm">OR</p>
-            <p
-              onClick={() => setEmailLogin(true)}
-              className="font-bold text-sm pt-3 underline underline-offset-4 cursor-pointer"
-            >
-              Login with email
-            </p>
-          </div> */}
 
           <div  className="pt-10 sm:pt-20 flex flex-col items-center justify-center">
             <p className="text-xs">All your personal details are safe with us.</p>
