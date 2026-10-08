@@ -1,46 +1,114 @@
-import React,{useEffect,useState} from 'react'
+import React, { useState } from 'react'
 import Navbar from '../Navbar/Navbar'
-import Login from '../Modal/Login';
-import Sell from '../Modal/Sell';
-import Card from '../Card/Card';
-import { ItemsContext } from '../Context/Item';
-import { fetchFromFirestore } from '../Firebase/Firebase'
+import Login from '../Modal/Login'
+import Sell from '../Modal/Sell'
+import Card from '../Card/Card'
+import { ItemsContext } from '../Context/Item'
 
 const Home = () => {
-  const [openModal ,setModal] = useState(false);
-  const [openModalSell,setModalSell] = useState(false);
 
-  const toggleModal = () =>{setModal(!openModal)}
-  const toggleModalSell = ()=>{setModalSell(!openModalSell)}
-  
-  // oro item firestore il ninnum edukkanam
-  const itemsCtx =ItemsContext();//refers to the context value;
-  
-  useEffect(()=>{
+  const [openModal, setModal] = useState(false)
+  const [openModalSell, setModalSell] = useState(false)
 
-    const getItems = async ()=>{
-      const datas = await fetchFromFirestore();
-      itemsCtx ?.setItems(datas); //(it is the setItems function provided by the context) => Fetch and set items in context
-                        // datas means it is the fetched data from the fireStore.
+  // Search text
+  const [searchTerm, setSearchTerm] = useState('')
+
+
+  const toggleModal = () => {
+    setModal(!openModal)
+  }
+
+
+  const toggleModalSell = () => {
+    setModalSell(!openModalSell)
+  }
+
+
+  // Get products from Items Context
+  const itemsCtx = ItemsContext()
+
+
+  // Filter products based on search
+  const filteredItems = itemsCtx.items.filter((item) => {
+
+    const search = searchTerm.toLowerCase().trim()
+
+    if (!search) {
+      return true
     }
-    
-    
-    getItems();
-    
-  },[])
 
-  useEffect(()=>{
-    console.log('Updated Items:' ,itemsCtx.items);
+    const title = item.title?.toLowerCase() || ''
+    const category = item.category?.toLowerCase() || ''
 
-  },[itemsCtx.items])
-  
+    return (
+      title.includes(search) ||
+      category.includes(search)
+    )
+  })
+
+
   return (
     <div>
-      <Navbar toggleModal={toggleModal} toggleModalSell={toggleModalSell} />
-      <Login toggleModal={toggleModal} status = {openModal} />
-      <Sell setItems={(itemsCtx).setItems} toggleModalSell={toggleModalSell} status = {openModalSell} />
-      <Card items={(itemsCtx).items  || []} />
-                                      {/* if items is not there then an empty array. */}
+
+      <Navbar
+        toggleModal={toggleModal}
+        toggleModalSell={toggleModalSell}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+      />
+
+
+      <Login
+        toggleModal={toggleModal}
+        status={openModal}
+      />
+
+
+      <Sell
+        setItems={itemsCtx.setItems}
+        toggleModalSell={toggleModalSell}
+        status={openModalSell}
+      />
+
+
+      {itemsCtx.loading ? (
+
+        <div className="flex justify-center items-center min-h-[400px]">
+
+          <p
+            className="text-lg"
+            style={{ color: '#002f34' }}
+          >
+            Loading products...
+          </p>
+
+        </div>
+
+      ) : filteredItems.length === 0 ? (
+
+        <div className="flex flex-col justify-center items-center min-h-[400px]">
+
+          <p
+            className="text-xl font-semibold"
+            style={{ color: '#002f34' }}
+          >
+            No products found
+          </p>
+
+          <p className="text-gray-500 mt-2">
+            Try searching for another product.
+          </p>
+
+        </div>
+
+      ) : (
+
+        <Card
+          items={filteredItems}
+        />
+
+      )}
+
     </div>
   )
 }
